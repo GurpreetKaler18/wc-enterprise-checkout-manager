@@ -49,6 +49,18 @@ final class SettingsPage
             'sanitize_callback' => [$this, 'sanitizeNumber'],
             'default' => 500,
         ]);
+
+        register_setting('sce_settings_group', 'sce_min_quantity_for_discount', [
+            'type' => 'integer',
+            'sanitize_callback' => [$this, 'sanitizePositiveInteger'],
+            'default' => 3,
+        ]);
+
+        register_setting('sce_settings_group', 'sce_discount_percentage', [
+            'type' => 'number',
+            'sanitize_callback' => [$this, 'sanitizePercentage'],
+            'default' => 10,
+        ]);
     }
 
     public function renderPage(): void
@@ -115,6 +127,34 @@ final class SettingsPage
                             />
                         </td>
                     </tr>
+                    <tr>
+                        <th scope="row"><label for="sce_min_quantity_for_discount"><?php esc_html_e('MIN_QUANTITY_FOR_DISCOUNT', 'smart-checkout-enhancer'); ?></label></th>
+                        <td>
+                            <input
+                                name="sce_min_quantity_for_discount"
+                                id="sce_min_quantity_for_discount"
+                                type="number"
+                                step="1"
+                                min="1"
+                                value="<?php echo esc_attr((string) get_option('sce_min_quantity_for_discount', '3')); ?>"
+                            />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th scope="row"><label for="sce_discount_percentage"><?php esc_html_e('DISCOUNT_PERCENTAGE', 'smart-checkout-enhancer'); ?></label></th>
+                        <td>
+                            <input
+                                name="sce_discount_percentage"
+                                id="sce_discount_percentage"
+                                type="number"
+                                step="0.01"
+                                min="0"
+                                max="100"
+                                value="<?php echo esc_attr((string) get_option('sce_discount_percentage', '10')); ?>"
+                            />
+                            <p class="description"><?php esc_html_e('Discount percentage applied when line quantity threshold is met.', 'smart-checkout-enhancer'); ?></p>
+                        </td>
+                    </tr>
                     </tbody>
                 </table>
                 <?php submit_button(__('Save Settings', 'smart-checkout-enhancer')); ?>
@@ -143,5 +183,23 @@ final class SettingsPage
         }
 
         return max(0.0, (float) $value);
+    }
+
+    public function sanitizePositiveInteger(mixed $value): int
+    {
+        if (!is_numeric($value)) {
+            return 1;
+        }
+
+        return max(1, (int) $value);
+    }
+
+    public function sanitizePercentage(mixed $value): float
+    {
+        if (!is_numeric($value)) {
+            return 0.0;
+        }
+
+        return min(100.0, max(0.0, (float) $value));
     }
 }
