@@ -83,8 +83,15 @@ SOLID highlights:
 
 ## Configuration Notes
 
-### Eligible Countries
-Change eligible countries via filter:
+### Settings Page
+Use **WooCommerce → Smart Checkout** to manage dynamic fee fields without code changes:
+- `eligible_countries`
+- `FEE_NAME`
+- `FEE_AMOUNT`
+- `CART_THRESHOLD`
+
+### Eligible Countries Filter (Optional)
+You can still override eligible countries programmatically via filter:
 
 ```php
 add_filter('sce_eligible_countries', function (array $countries): array {
