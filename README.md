@@ -22,7 +22,7 @@ Defaults:
 
 ### 2) Dynamic Cart Item Pricing
 The plugin dynamically adjusts item pricing before totals are calculated:
-- Applies a 10% discount when cart line quantity is 3 or more
+- Applies a configurable discount percentage when cart line quantity meets a configurable minimum (defaults: 10% at quantity 3)
 - Uses regular price as base when available
 - Logs every modified line item for observability
 
@@ -89,6 +89,8 @@ Use **WooCommerce → Smart Checkout** to manage dynamic fee fields without code
 - `FEE_NAME`
 - `FEE_AMOUNT`
 - `CART_THRESHOLD`
+- `MIN_QUANTITY_FOR_DISCOUNT`
+- `DISCOUNT_PERCENTAGE`
 
 ### Eligible Countries Filter (Optional)
 You can still override eligible countries programmatically via filter:

@@ -9,8 +9,8 @@ use WC_Cart;
 
 final class DynamicPriceService
 {
-    private const MIN_QUANTITY_FOR_DISCOUNT = 3;
-    private const DISCOUNT_PERCENTAGE = 10;
+    private const DEFAULT_MIN_QUANTITY_FOR_DISCOUNT = 3;
+    private const DEFAULT_DISCOUNT_PERCENTAGE = 10.0;
 
     private bool $hasRun = false;
 
@@ -30,12 +30,14 @@ final class DynamicPriceService
         }
 
         $this->hasRun = true;
+        $minQuantityForDiscount = $this->getMinQuantityForDiscount();
+        $discountPercentage = $this->getDiscountPercentage();
 
         foreach ($cart->get_cart() as $key => $cartItem) {
             $product = $cartItem['data'] ?? null;
             $quantity = (int) ($cartItem['quantity'] ?? 0);
 
-            if (!$product || $quantity < self::MIN_QUANTITY_FOR_DISCOUNT) {
+            if (!$product || $quantity < $minQuantityForDiscount) {
                 continue;
             }
 
@@ -48,16 +50,40 @@ final class DynamicPriceService
                 continue;
             }
 
-            $newPrice = round($basePrice * ((100 - self::DISCOUNT_PERCENTAGE) / 100), wc_get_price_decimals());
+            $newPrice = round($basePrice * ((100 - $discountPercentage) / 100), wc_get_price_decimals());
             $product->set_price($newPrice);
 
             $this->logger->info('dynamic_price_updated', [
                 'cart_item_key' => $key,
                 'product_id' => (int) $product->get_id(),
                 'quantity' => $quantity,
+                'min_quantity_for_discount' => $minQuantityForDiscount,
+                'discount_percentage' => $discountPercentage,
                 'base_price' => $basePrice,
                 'new_price' => $newPrice,
             ]);
         }
+    }
+
+    private function getMinQuantityForDiscount(): int
+    {
+        $savedValue = get_option('sce_min_quantity_for_discount', self::DEFAULT_MIN_QUANTITY_FOR_DISCOUNT);
+
+        if (!is_numeric($savedValue)) {
+            return self::DEFAULT_MIN_QUANTITY_FOR_DISCOUNT;
+        }
+
+        return max(1, (int) $savedValue);
+    }
+
+    private function getDiscountPercentage(): float
+    {
+        $savedValue = get_option('sce_discount_percentage', self::DEFAULT_DISCOUNT_PERCENTAGE);
+
+        if (!is_numeric($savedValue)) {
+            return self::DEFAULT_DISCOUNT_PERCENTAGE;
+        }
+
+        return min(100.0, max(0.0, (float) $savedValue));
     }
 }
