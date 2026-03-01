@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace SCE;
 
+use SCE\Admin\SettingsPage;
 use SCE\Analytics\CheckoutAnalyticsRecorder;
 use SCE\Background\OrderCompletionJob;
 use SCE\Checkout\ConditionalFeeService;
@@ -14,6 +15,9 @@ final class Plugin
 {
     public function boot(): void
     {
+        $settingsPage = new SettingsPage();
+        $settingsPage->register();
+
         $logger = new EventLogger();
 
         $feeService = new ConditionalFeeService($logger);
